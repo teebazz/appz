@@ -32,7 +32,7 @@
 			        <tbody>
 			        	@foreach($students as $student)
 			            <tr>
-			                <td class=" sorting_1">{{ ucfirst($student->lastname) }} {{ ucfirst($student->firstname) }}</td>
+			                <td class=" sorting_1">{{ ucfirst($student->user->lastname) }} {{ ucfirst($student->user->firstname) }}</td>
 			                <td class=" ">{{ $student->classy->name }}</td>
 			                <td class=" ">{{ $student->app_number }}</td>
 			                <td class="center ">{{$student->status}}</td>

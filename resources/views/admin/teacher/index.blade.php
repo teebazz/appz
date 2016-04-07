@@ -35,8 +35,8 @@
 			        <tbody>
 			        	@foreach($teachers as $teacher)
 			            <tr>
-			                <td class=" sorting_1">{{ ucfirst($teacher->lastname) }} {{ ucfirst($teacher->firstname) }}</td>
-			                <td class="center ">{{ $teacher->phone }}</td>
+			                <td class=" sorting_1">{{ ucfirst($teacher->user->lastname) }} {{ ucfirst($teacher->user->firstname) }}</td>
+			                <td class="center ">{{ $teacher->user->phone }}</td>
 			                <td class="center ">{{ $teacher->status }}</td>
 			                <td class="center "><a href="#" class="btn btn-warning btn-xs edit"><i class="fa fa-search"></i> View</a> <a href="{{ url('admin/edit-teacher',$teacher->id)}}" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o"></i> Delete</a></td>
 			            </tr>

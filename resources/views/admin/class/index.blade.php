@@ -59,7 +59,7 @@
 			                <td class=" sorting_1">{{ $class->name }}</td>
 			                <td class="center ">{{ $class->order }}</td>
 			                <td class="center ">{{ $class->status }}</td>
-			                <td class="center "><a href="{{ url('admin/edit-class',$class->id)}}" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o"></i> Delete</a></td>
+			                <td class="center "><a href="{{ url('admin/class-subject',$class->id)}}" class="btn btn-warning btn-xs edit"><i class="fa fa-server"></i> Manage Subjects</a> <a href="{{ url('admin/edit-class',$class->id)}}" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o"></i> Delete</a></td>
 			            </tr>
 			            @endforeach
 			        </tbody>

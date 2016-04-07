@@ -3,24 +3,35 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Classes;
-use App\Teacher;
-use App\Section;
+
+use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Subject;
+use App\Teacher;
+use App\ClassSubject;
+use App\Division;
+use App\Classes;
+use Illuminate\Session\SessionManager;
+use Input;
 use DB;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Requests;
 
-class SectionController extends Controller
+class ManageSubjectController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($id)
     {
-        //
+        $data['class_subjects'] = ClassSubject::where('class_id', $id)->get();
+        $data['title']          = Classes::find($id)->name;
+        $data['division']       = Classes::find($id)->division_id;
+        $data['class_id']      = $id;
+        $data['subjects']      = Subject::where('division_id',$data['division'])->get();
+        $data['teachers']      = Teacher::all();
+        return view('admin.subject.manageclass',$data);
     }
 
     /**
@@ -30,10 +41,7 @@ class SectionController extends Controller
      */
     public function create()
     {
-        $data['title'] = 'New Section';
-        $data['classes'] = Classes::all();
-        $data['teachers'] = Teacher::all();
-        return view('admin.class.newsection',$data);
+        //
     }
 
     /**
@@ -44,19 +52,26 @@ class SectionController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         if(empty($request['teacher_id'])){
             $request['teacher_id'] = null;
         }
-        $validator = Validator::make($request->all(),['name' =>'required|unique:sections|min:3','class_id'=>'required']) ;
+        $check = DB::table('class_subject')->where(['class_id'=>$request['class_id'],'subject_id' => $request['subject_id']])->count();
+        $validator = Validator::make($request->all(),['subject_id' =>'required']) ;
         if ($validator->fails()) {
-            return redirect('admin/new-section')
+            return redirect('admin/class-subject/'.$request['class_id'])
             ->withErrors($validator)
                 ->withInput($request->all());
         }
+        if ($check > 0) {
+            return redirect('admin/class-subject/'.$request['class_id'])
+            ->withErrors('Subject Already Added To this Class')
+                ->withInput($request->all());
+        }
         $request['status'] = 'active';
-        $saveClass = Section::create($request->all());
-        \Session::flash('flash_message','Section Successfully Added');
-        return redirect('admin/new-section');
+        $saveClass = ClassSubject::create($request->all());
+        \Session::flash('flash_message','Subject Successfully Added to Class');
+        return redirect('admin/class-subject/'.$request['class_id']);
     }
 
     /**
@@ -78,11 +93,7 @@ class SectionController extends Controller
      */
     public function edit($id)
     {
-        $data['classes']    = DB::table('classes')->lists('name', 'id');
-        $data['teachers']   = Teacher::select(DB::raw("CONCAT(firstname,' ', lastname) AS full_name, id"))->lists('full_name', 'id');
-        $data['section'] = Section::findOrfail($id);
-        $data['title'] = $data['section']->name;
-        return view('admin.class.editsection',$data);
+        //
     }
 
     /**
@@ -94,17 +105,7 @@ class SectionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $input = $request->except('_token');
-        $validator = Validator::make($input,['name' =>'required|min:3','class_id'=>'required']);
-        if ($validator->fails()) {
-           return redirect('admin/edit-section/'.$id)
-            ->withErrors($validator)
-                ->withInput($request->all());
-        }
-        $request['status'] = 'active';
-        $saveClass = Section::where('id', $id)->update($input);
-        \Session::flash('flash_message','Section Details Successfully Updated');
-        return redirect('admin/edit-section/'.$id)->withInput($request->all());
+        //
     }
 
     /**

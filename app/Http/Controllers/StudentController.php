@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Session\SessionManager;
 use DB;
 use Hash;
+use App\User;
 use App\Division;
 use App\Student;
 use App\Parents;
 use App\Http\Requests;
+use App\Http\Requests\createUserRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 
@@ -34,11 +36,11 @@ class StudentController extends Controller
      */
     public function create()
     {
-        $data['title']  = 'New Student';
-        $data['parents'] = Parents::all();
-        $data['states'] = DB::table('states')->get();
-        $data['classes'] = DB::table('classes')->orderBy('order')->get();
-        $data['divisions'] = Division::all();
+        $data['title']      = 'New Student';
+        $data['parents']    = Parents::all();
+        $data['states']     = DB::table('states')->get();
+        $data['classes']    = DB::table('classes')->orderBy('order')->get();
+        $data['divisions']  = Division::all();
         return view('admin.student.new',$data);
     }
 
@@ -48,18 +50,10 @@ class StudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(createUserRequest $request)
     {
         $file = $request->file('photo');
         $validator = Validator::make($request->all(),[
-            'email' =>'required',
-            'phone' =>'required',
-            'firstname' =>'required|min:3',
-            'lastname' =>'required|min:3',
-            'birthdate' =>'required',
-            'address' =>'required',
-            'gender' =>'required',
-            'state_id' =>'required',
             'class_id' =>'required',
             'photo'    => 'required'
             ]);
@@ -82,11 +76,14 @@ class StudentController extends Controller
             $request->file('photo')->move(base_path() . '/public/sitefiles/student_image/',$imageName);
             $request['image'] = $imageName;
         }
-        // dd($request->all());
-        $input = $request->except('photo');
+        $user = User::create($request->all());
+        $input = $request->except('image','photo');
+        $input['user_id'] = $user->id;
+        $input['status'] = 'active';
         $saveClass = Student::create($input);
+        $user->group()->attach('3');
         \Session::flash('flash_message','Student Successfully Created');
-        return redirect('admin/new-student');
+        return redirect('admin/students');
     }
 
     /**
@@ -108,9 +105,13 @@ class StudentController extends Controller
      */
     public function edit($id)
     {
-        $data['student'] = Student::findOrfail($id);
-        // $data['parents'] = Parents::all();
-        $data['parents']    = Parents::all()->lists('name', 'id');
+        // $data['student'] = Student::findOrfail($id);
+        $data['studentsu'] =  DB::table('students')
+            ->join('users', 'users.id', '=', 'students.user_id')
+            ->select('users.*', 'students.*')->where('students.id',$id)
+            ->get();
+        $data['student'] =  $data['studentsu'][0];
+        $data['parents']    = DB::table('parents')->select(DB::raw("CONCAT(users.firstname,' ', users.lastname) AS full_name, parents.id"))->join('users', 'parents.user_id', '=', 'users.id')->lists('full_name', 'id');
         $data['title']      = $data['student']->lastname.' '.$data['student']->firstname;
         $class_id           = $data['student']->class_id;
         $data['sections']   = DB::table('sections')->where(['class_id'=>$class_id])->lists('name', 'id');
@@ -128,19 +129,11 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id,createUserRequest $request)
     {
         $file = $request->file('photo');
         $data['student'] = Student::findOrfail($id);
         $validator = Validator::make($request->all(),[
-            'email' =>'required',
-            'phone' =>'required',
-            'firstname' =>'required|min:3',
-            'lastname' =>'required|min:3',
-            'birthdate' =>'required',
-            'address' =>'required',
-            'gender' =>'required',
-            'state_id' =>'required',
             'class_id' =>'required'
             ]);
         if(empty($request['section_id'])){
@@ -159,9 +152,10 @@ class StudentController extends Controller
             $request->file('photo')->move(base_path() . '/public/sitefiles/student_image/',$imageName);
             $request['image'] = $imageName;
         }
-        // dd($request->all());
-        $input = $request->except('photo','_token');
-        // $input2 = $request->except('_token');
+        $saveUser = User::where('id', $data['student']->user_id)->update($request->except('_token','parent_id','division_id','class_id','section_id'));
+
+        $input = $request->only('parent_id','division_id','class_id','section_id');
+        $input['status'] = 'active';
         $saveClass = Student::where('id', $id)->update($input);
         \Session::flash('flash_message','Student Successfully Updated');
         return redirect('admin/edit-student/'.$id);

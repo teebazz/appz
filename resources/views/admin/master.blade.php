@@ -395,7 +395,7 @@ Purchase: https://wrapbootstrap.com/theme/beyondadmin-adminapp-angularjs-mvc-WB0
                     <li>
                         <a href="#" class="menu-dropdown">
                             <i class="menu-icon fa fa-users"></i>
-                            <span class="menu-text"> Stutdents </span>
+                            <span class="menu-text"> Students </span>
 
                             <i class="menu-expand"></i>
                         </a>

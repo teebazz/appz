@@ -19,5 +19,10 @@ class Classes extends Model
     {
     	return $this->hasOne('App\Student');
     }
+
+    public function classSubject()
+    {
+        return $this->hasMany('App\ClassSubject');
+    }
 }
 

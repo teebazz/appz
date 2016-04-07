@@ -32,8 +32,6 @@ Route::group([ 'prefix' => 'admin', 'before' => 'admin'], function(){
 	Route::post('new-section','SectionController@store');
 	Route::patch('edit-class/{id}', 'ClassController@update');
 
-
-
 	Route::get('teachers', 'TeacherController@index');
 	Route::get('new-teacher', 'TeacherController@create');
 	Route::get('edit-teacher/{id}', 'TeacherController@edit');
@@ -53,6 +51,14 @@ Route::group([ 'prefix' => 'admin', 'before' => 'admin'], function(){
 	Route::get('sessterm','SessionTermController@index');
 	Route::get('new-session','SessionTermController@createSession');
 	Route::post('new-session','SessionTermController@storeSession');
+
+	Route::get('subjects','SubjectController@index');
+	Route::get('new-subject','SubjectController@create');
+	Route::get('edit-subject/{id}', 'SubjectController@edit');
+	Route::post('edit-subject/{id}', 'SubjectController@update');
+	Route::post('new-subject','SubjectController@store');
+	Route::get('class-subject/{id}', 'ManageSubjectController@index');
+	Route::post('new-class-subject', 'ManageSubjectController@store');
 
 	//ajax routes
 	Route::get('classsection','ClassController@sectionClass');

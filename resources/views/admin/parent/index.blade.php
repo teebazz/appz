@@ -32,8 +32,8 @@
 			        <tbody>
 			        	@foreach($parents as $parent)
 			            <tr>
-			                <td class=" sorting_1">{{$parent->name}}</td>
-			                <td class=" ">{{$parent->phone}}</td>
+			                <td class=" sorting_1">{{$parent->user->lastname}}</td>
+			                <td class=" ">{{$parent->user->phone}}</td>
 			                <td class=" ">{{$parent->status}}</td>
 			                <td class="center "><a href="#" class="btn btn-warning btn-xs edit"><i class="fa fa-search"></i> View</a> <a href="{{ url('admin/edit-parent',$parent->id)}}" class="btn btn-info btn-xs edit"><i class="fa fa-edit"></i> Edit</a> <a href="#" class="btn btn-danger btn-xs delete"><i class="fa fa-trash-o"></i> Delete</a></td>
 			            </tr>

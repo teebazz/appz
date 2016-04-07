@@ -90,7 +90,7 @@
                                                 <select class="form-control" name="parent_id" id="e1">
                                                     <option selected="selected" value="">Select Parent</option>
                                                     @foreach($parents as $parent)
-                                                        <option value="{{$parent->id}}">{{$parent->name}}</option>
+                                                        <option value="{{$parent->id}}">{{$parent->user->lastname}} {{$parent->user->firstname}}</option>
                                                     @endforeach
                                                 </select>
 

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Teacher;
+use App\User;
 use Illuminate\Session\SessionManager;
 use DB;
 use Hash;
+use App\Http\Requests\createUserRequest;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -43,18 +45,12 @@ class TeacherController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(createUserRequest $request)
     {
         $validator = Validator::make($request->all(),[
-            'email' =>'required|unique:teachers',
-            'phone' =>'required|unique:teachers',
-            'firstname' =>'required|min:3',
-            'lastname' =>'required|min:3',
-            'birthdate' =>'required',
-            'address' =>'required',
-            'gender' =>'required',
-            'state_id' =>'required'
-            ]);
+            'email' =>'required|unique:users',
+            'phone' =>'required|unique:users',
+        ]);
         if ($validator->fails()) {
            return redirect('admin/new-teacher')
             ->withErrors($validator)
@@ -63,9 +59,13 @@ class TeacherController extends Controller
         $randpass          = '99999';
         $request['status'] = 'active';
         $request['password'] = Hash::make($randpass);
-        $saveClass = Teacher::create($request->all());
+        $saveUser   = User::create($request->all());
+        $userr['user_id'] = $saveUser->id;
+        $saveUser->group()->attach('2');
+        $userr['status'] = 'active';
+        $saveClass  = Teacher::create($userr);
         \Session::flash('flash_message','Teacher Successfully Created');
-        return redirect('admin/new-teacher');
+        return redirect('admin/teachers');
     }
 
     /**
@@ -87,7 +87,11 @@ class TeacherController extends Controller
      */
     public function edit($id)
     {
-        $data['teacher'] = Teacher::findOrfail($id);
+        $data['teachersu'] =  DB::table('teachers')
+            ->join('users', 'users.id', '=', 'teachers.user_id')
+            ->select('users.*', 'teachers.*')->where('teachers.id',$id)
+            ->get();
+        $data['teacher'] = $data['teachersu'][0];
         $data['title']   = $data['teacher']->lastname.' '.$data['teacher']->firstname;
         $data['states']  = DB::table('states')->lists('name', 'id');
         return view('admin.teacher.edit',$data);
@@ -100,17 +104,13 @@ class TeacherController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(createUserRequest $request, $id)
     {
-        $input = $request->except('_token');
-        $validator = Validator::make($input,[
-            'firstname' =>'required|min:3',
-            'lastname' =>'required|min:3',
-            'email' =>'required|unique:teachers,email,'.$id,
-            'birthdate' =>'required',
-            'address' =>'required',
-            'gender' =>'required',
-            'state_id' =>'required'
+        $data['teacher'] = Teacher::findOrfail($id);
+        $request['user_id'] = $data['teacher']->user_id;
+        $input = $request->only('user_id');
+        $validator = Validator::make($request->all(),[
+            'email' =>'required|unique:users,email,'.$data['teacher']->user_id,
             ]);
         if ($validator->fails()) {
            return redirect('admin/edit-teacher/'.$id)
@@ -118,6 +118,7 @@ class TeacherController extends Controller
                 ->withInput($request->all());
         }
         $request['status'] = 'active';
+        $saveUser = User::where('id', $data['teacher']->user_id)->update($request->except('_token','photo','user_id'));
         $saveClass = Teacher::where('id', $id)->update($input);
         \Session::flash('flash_message','Teacher\'s Details Successfully Updated');
         return redirect('admin/edit-teacher/'.$id)->withInput($request->all());

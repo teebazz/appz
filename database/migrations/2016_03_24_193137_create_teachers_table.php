@@ -14,23 +14,10 @@ class CreateTeachersTable extends Migration
     {
         Schema::create('teachers', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->string('othername');
-            $table->string('photo');
-            $table->string("gender");
-            $table->string("birthdate");
-            $table->string("address");
-            $table->string("city")->nullable();
-            $table->string("phone")->nullable();
-            $table->string("email")->nullable();
-            $table->string("religion")->nullable();
-            $table->string("blood_group")->nullable();
-            $table->string("password");
             $table->string("status");
             $table->timestamps();
-            $table->integer('state_id')->unsigned();
-            $table->foreign('state_id')->references('id')->on('states');
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

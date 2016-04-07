@@ -15,23 +15,10 @@ class CreateStudentsTable extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->increments('id');
             $table->string("app_number");
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->string('othername');
-            $table->string('image');
-            $table->string("gender");
-            $table->string("birthdate");
-            $table->string("address");
-            $table->string("city")->nullable();
-            $table->string("phone")->nullable();
-            $table->string("email")->nullable();
-            $table->string("religion")->nullable();
-            $table->string("blood_group")->nullable();
-            $table->string("password");
             $table->string("status");
             $table->timestamps();
-            $table->integer('state_id')->unsigned();
-            $table->foreign('state_id')->references('id')->on('states');
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users');
             $table->integer('class_id')->unsigned();
             $table->foreign('class_id')->references('id')->on('classes');
             $table->integer('section_id')->unsigned()->nullable();
